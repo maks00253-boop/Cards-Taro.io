@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tarot Fix</title>
+    <style>
+        :root {
+            --bg: #0e1621;
+            --tg-blue: #2481cc;
+            --gold: #f3d078;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: white;
+            font-family: -apple-system, system-ui, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Убираем лишние отступы */
+            padding: 0;
+        }
+
+        .header {
+            padding: 40px 0 10px;
+            text-align: center;
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .slots-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .slot {
+            width: 28vw; /* Адаптивный размер под ширину экрана */
+            max-width: 100px;
+            aspect-ratio: 2/3.2;
+            border: 1px dashed rgba(243, 208, 120, 0.2);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .card {
+            position: absolute;
+            inset: 0;
+            background: #1c2733;
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            animation: flyIn 0.4s ease-out forwards;
+        }
+
+        @keyframes flyIn {
+            0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .card-emoji { font-size: 32px; margin-bottom: 5px; }
+        .card-name { font-size: 10px; color: var(--gold); font-weight: bold; text-transform: uppercase; }
+
+        .deck-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck {
+            width: 80px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--tg-blue), #1c2733);
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* ИСПРАВЛЕННЫЙ ФУТЕР */
+        .footer {
+            padding: 20px 20px calc(40px + env(safe-area-inset-bottom)); /* Увеличенный отступ снизу */
+            background: #17212b;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .btn {
+            width: 100%;
+            height: 56px;
+            background: var(--tg-blue);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn.reset { background: #313d4d; }
+    </style>
+</head>
+<body>
+
+    <div class="header">🔮 МАГИЯ ТАРО</div>
+
+    <div class="slots-container">
+        <div class="slot" id="slot-0"></div>
+        <div class="slot" id="slot-1"></div>
+        <div class="slot" id="slot-2"></div>
+    </div>
+
+    <div class="deck-area">
+        <div class="deck" id="deck-visual"></div>
+    </div>
+
+    <div class="footer">
+        <button class="btn" id="mainBtn" onclick="drawCard()">ВЫТЯНУТЬ КАРТУ</button>
+    </div>
+
+    <script>
+        const cards = [
+            {n: 'Смерть', e: '💀'}, {n: 'Золото', e: '💰'}, {n: 'Любовь', e: '❤️'},
+            {n: 'Красота', e: '💎'}, {n: 'Чума', e: '🎭'}, {n: 'Солнце', e: '☀️'},
+            {n: 'Луна', e: '🌙'}, {n: 'Сила', e: '🦁'},
+            {n: 'Звезда', e: '✨'}, {n: 'Монета', e: '🪙'}
+        ];
+
+        let count = 0;
+        let used = [];
+
+        function drawCard() {
+            const btn = document.getElementById('mainBtn');
+            if (count >= 3) { location.reload(); return; }
+
+            let rand;
+            do { rand = Math.floor(Math.random() * cards.length); } while (used.includes(rand));
+            used.push(rand);
+
+            const targetSlot = document.getElementById(`slot-${count}`);
+            const data = cards[rand];
+            
+            targetSlot.innerHTML = `
+                <div class="card">
+                    <span class="card-emoji">${data.e}</span>
+                    <span class="card-name">${data.n}</span>
+                </div>
+            `;
+            count++;
+
+            if (count === 3) {
+                btn.innerText = 'ПОПРОБОВАТЬ СНОВА';
+                btn.classList.add('reset');
+                document.getElementById('deck-visual').style.opacity = '0.2';
+            }
+        }
+    </script>
+</body>
+</html>
