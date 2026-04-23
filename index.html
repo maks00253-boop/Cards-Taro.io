@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Эта строка обязательна для русского языка -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tarot Diary App</title>
+    <title>Tarot Pro</title>
     <style>
         :root {
             --bg: #0e1621;
             --tg-blue: #2481cc;
             --gold: #f3d078;
-            --modal-bg: #17212b;
+            --card-bg: #1c2733;
         }
 
         body {
@@ -24,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* Улучшенная шапка, чтобы ничего не накладывалось */
+        /* Шапка */
         .top-bar {
             padding: 40px 20px 10px;
             display: flex;
@@ -32,38 +31,40 @@
             align-items: center;
         }
 
-        .header-title {
-            color: var(--gold);
-            font-weight: bold;
-            font-size: 18px;
-            flex: 1;
-            text-align: center;
-            margin-left: 40px; /* Чтобы сбалансировать кнопку справа */
-        }
-
         .diary-btn {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid var(--gold);
             color: var(--gold);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 14px;
             cursor: pointer;
-            white-space: nowrap;
         }
 
-        .slots-container {
+        /* Контейнер слотов */
+        .slots-outer {
+            flex: 2; /* Даем больше места картам */
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 8px;
             padding: 10px;
         }
 
+        .slots-container {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Настройки сеток */
+        .mode-1 { grid-template-columns: 1fr; width: 120px; }
+        .mode-3 { grid-template-columns: repeat(3, 1fr); }
+        .mode-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
+
         .slot {
-            width: 28vw;
-            max-width: 100px;
             aspect-ratio: 2/3.2;
-            border: 1px dashed rgba(243, 208, 120, 0.2);
+            border: 1px dashed rgba(243, 208, 120, 0.3);
             border-radius: 12px;
             position: relative;
         }
@@ -71,212 +72,219 @@
         .card {
             position: absolute;
             inset: 0;
-            background: #1c2733;
+            background: var(--card-bg);
             border: 1px solid var(--gold);
             border-radius: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
             animation: flyIn 0.4s ease-out forwards;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         @keyframes flyIn {
-            0% { transform: translateY(100px) scale(0.8); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
-        .card-emoji { font-size: 32px; margin-bottom: 5px; }
-        .card-name { font-size: 10px; color: var(--gold); font-weight: bold; text-transform: uppercase; text-align: center; padding: 0 4px; }
+        .card-emoji { font-size: 28px; }
+        .card-name { font-size: 9px; color: var(--gold); font-weight: bold; margin-top: 5px; text-transform: uppercase; text-align: center; }
 
-        .deck-area {
-            flex: 1;
+        /* Выбор режима ПОД картами */
+        .mode-selector {
             display: flex;
             justify-content: center;
-            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .deck {
-            width: 80px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--tg-blue), #1c2733);
-            border-radius: 10px;
-            border: 2px solid rgba(255,255,255,0.2);
-            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+        .mode-btn {
+            background: #1c2733;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: var(--tg-blue);
+            border-color: var(--tg-blue);
+            box-shadow: 0 0 10px var(--tg-blue);
         }
 
         .footer {
             padding: 20px 20px calc(30px + env(safe-area-inset-bottom));
             background: #17212b;
-            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
         .btn {
             width: 100%;
-            height: 54px;
+            height: 56px;
             background: var(--tg-blue);
             border: none;
-            border-radius: 14px;
+            border-radius: 16px;
             color: white;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
+            transition: 0.3s;
         }
 
-        /* ДНЕВНИК */
+        /* Серая кнопка переиграть */
+        .btn.reset-state {
+            background: #313d4d !important;
+            color: #a0a0a0;
+        }
+
+        /* Дневник */
         #diary-modal {
             display: none;
             position: fixed;
             inset: 0;
             background: var(--bg);
-            z-index: 100;
+            z-index: 1000;
             flex-direction: column;
         }
 
-        .modal-header {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .diary-content {
+        .diary-list {
             flex: 1;
             overflow-y: auto;
             padding: 15px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
             gap: 15px;
         }
 
-        .diary-item {
-            background: var(--modal-bg);
-            padding: 15px;
-            border-radius: 16px;
+        .diary-row {
             display: flex;
+            background: #17212b;
+            padding: 12px;
+            border-radius: 15px;
             align-items: center;
             gap: 15px;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .diary-item:nth-child(even) { flex-direction: row-reverse; text-align: right; }
+        .diary-row:nth-child(even) { flex-direction: row-reverse; text-align: right; }
 
-        .diary-card-preview {
-            min-width: 60px;
-            height: 90px;
+        .mini-card {
+            width: 50px;
+            height: 75px;
             background: #1c2733;
             border: 1px solid var(--gold);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
         }
 
-        .diary-text h4 { margin: 0; color: var(--gold); font-size: 15px; }
-        .diary-text p { margin: 5px 0 0; font-size: 13px; color: #b1bcc9; line-height: 1.4; }
-
-        .close-btn { background: none; border: none; color: white; font-size: 28px; }
-
+        .close-x { font-size: 30px; color: white; background: none; border: none; padding: 20px; text-align: right; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <div class="header-title">🔮 МАГИЯ ТАРО</div>
+        <div style="font-weight: bold; color: var(--gold)">🔮 TAROT BOT</div>
         <button class="diary-btn" onclick="toggleDiary(true)">📕 ДНЕВНИК</button>
     </div>
 
-    <div class="slots-container">
-        <div class="slot" id="slot-0"></div>
-        <div class="slot" id="slot-1"></div>
-        <div class="slot" id="slot-2"></div>
+    <!-- Место для карт -->
+    <div class="slots-outer">
+        <div class="slots-container mode-1" id="slots-box"></div>
     </div>
 
-    <div class="deck-area">
-        <div class="deck" id="deck-visual"></div>
+    <!-- Выбор режима ПОД картами -->
+    <div class="mode-selector" id="selector">
+        <button class="mode-btn active" onclick="setMode(1)">1</button>
+        <button class="mode-btn" onclick="setMode(3)">3</button>
+        <button class="mode-btn" onclick="setMode(6)">6</button>
     </div>
 
     <div class="footer">
         <button class="btn" id="mainBtn" onclick="drawCard()">ВЫТЯНУТЬ КАРТУ</button>
     </div>
 
+    <!-- Модалка дневника -->
     <div id="diary-modal">
-        <div class="modal-header">
-            <h3 style="margin:0">📕 Дневник Карт</h3>
-            <button class="close-btn" onclick="toggleDiary(false)">×</button>
-        </div>
-        <div class="diary-content" id="diary-list"></div>
+        <button class="close-x" onclick="toggleDiary(false)">✕</button>
+        <div class="diary-list" id="diary-inject"></div>
     </div>
 
     <script>
-        const cards = [
-            {n: 'Смерть', e: '💀', d: 'Конец старого и начало нового. Время отпустить прошлое.'},
-            {n: 'Золото', e: '💰', d: 'Удача в делах и неожиданное материальное пополнение.'},
-            {n: 'Любовь', e: '❤️', d: 'Гармония в сердце и новые искренние чувства.'},
-            {n: 'Красота', e: '💎', d: 'Внутренний свет привлечет к тебе нужных людей.'},
-            {n: 'Чума', e: '🎭', d: 'Будь осторожен с окружением, возможны сплетни.'},
-            {n: 'Солнце', e: '☀️', d: 'Период максимальной энергии и больших побед.'},
-            {n: 'Луна', e: '🌙', d: 'Слушай интуицию, не всё является тем, чем кажется.'},
-            {n: 'Сила', e: '🦁', d: 'Твоя воля поможет преодолеть любые препятствия.'},
-            {n: 'Звезда', e: '✨', d: 'Твои мечты имеют огромный потенциал сбыться.'},
-            {n: 'Монета', e: '🪙', d: 'Стабильность и уверенность в завтрашнем дне.'},
-            {n: 'Самолёт', e: '✈️', d: 'Скорые перемены, переезд или дальнее известие.'},
-            {n: 'Шут', e: '🃏', d: 'Время для авантюр и легкости. Начни с чистого листа.'},
-            {n: 'Кубок', e: '🏆', d: 'Заслуженная награда за твои прошлые старания.'},
-            {n: 'Пополнение', e: '🤰', d: 'Рождение новых идей или важных проектов.'},
-            {n: 'Правда', e: '👁️', d: 'Тайное станет явным. Будь честен с собой.'},
-            {n: 'Везение', e: '🍀', d: 'Счастливый случай поможет там, где не ждали.'},
-            {n: 'Иммунитет', e: '🛡️', d: 'Твоя защита крепка. Негатив не коснется тебя.'}
+        const cardsData = [
+            {n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.'},
+            {n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.'},
+            {n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.'},
+            {n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.'},
+            {n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.'},
+            {n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.'},
+            {n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.'},
+            {n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.'},
+            {n: 'Удача', e: '🍀', d: 'Счастливый случай и успех в риске.'}
         ];
 
-        let count = 0;
+        let mode = 1;
+        let drawn = 0;
         let used = [];
+
+        function setMode(n) {
+            if (drawn > 0) return;
+            mode = n;
+            const box = document.getElementById('slots-box');
+            box.className = `slots-container mode-${n}`;
+            box.innerHTML = '';
+            for(let i=0; i<n; i++) box.innerHTML += `<div class="slot" id="slot-${i}"></div>`;
+            
+            document.querySelectorAll('.mode-btn').forEach((b, idx) => {
+                b.classList.toggle('active', [1,3,6][idx] === n);
+            });
+        }
+        setMode(1);
 
         function drawCard() {
             const btn = document.getElementById('mainBtn');
-            if (count >= 3) { location.reload(); return; }
+            if (drawn >= mode) { location.reload(); return; }
 
-            let rand;
-            do { rand = Math.floor(Math.random() * cards.length); } while (used.includes(rand));
-            used.push(rand);
+            document.getElementById('selector').style.opacity = '0.3';
+            document.getElementById('selector').style.pointerEvents = 'none';
 
-            const targetSlot = document.getElementById(`slot-${count}`);
-            const data = cards[rand];
-            
-            targetSlot.innerHTML = `
+            let r;
+            do { r = Math.floor(Math.random() * cardsData.length); } while (used.includes(r));
+            used.push(r);
+
+            const card = cardsData[r];
+            document.getElementById(`slot-${drawn}`).innerHTML = `
                 <div class="card">
-                    <span class="card-emoji">${data.e}</span>
-                    <span class="card-name">${data.n}</span>
+                    <span class="card-emoji">${card.e}</span>
+                    <span class="card-name">${card.n}</span>
                 </div>
             `;
-            count++;
+            drawn++;
 
-            if (count === 3) {
+            if (drawn === mode) {
                 btn.innerText = 'ПЕРЕИГРАТЬ';
-                btn.style.background = '#313d4d';
-                document.getElementById('deck-visual').style.opacity = '0.2';
+                btn.classList.add('reset-state');
             }
         }
 
-        function toggleDiary(show) {
-            const modal = document.getElementById('diary-modal');
-            modal.style.display = show ? 'flex' : 'none';
-            if (show) renderDiary();
-        }
-
-        function renderDiary() {
-            const list = document.getElementById('diary-list');
-            list.innerHTML = cards.map(card => `
-                <div class="diary-item">
-                    <div class="diary-card-preview"><span>${card.e}</span></div>
-                    <div class="diary-text">
-                        <h4>${card.n}</h4>
-                        <p>${card.d}</p>
+        function toggleDiary(s) {
+            const m = document.getElementById('diary-modal');
+            m.style.display = s ? 'flex' : 'none';
+            if(s) {
+                document.getElementById('diary-inject').innerHTML = cardsData.map(c => `
+                    <div class="diary-row">
+                        <div class="mini-card">${c.e}</div>
+                        <div>
+                            <div style="color:var(--gold); font-weight:bold; font-size:14px;">${c.n}</div>
+                            <div style="color:#708499; font-size:12px;">${c.d}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
     </script>
 </body>
