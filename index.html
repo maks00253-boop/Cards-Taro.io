@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Taro Cards</title>
+    <title>Tarot Fix Deck</title>
     <style>
         :root {
             --bg: #0e1621;
             --tg-blue: #2481cc;
+            /* Изменил на более желтый цвет для рамки */
+            --yellow-border: #ffff00;
             --gold: #f3d078;
             --card-bg: #1c2733;
+
+            /* Разные цвета для небольшого свечения */
+            --rare-glow: rgba(16, 185, 129, 0.3); /* Легкий зеленый */
+            --epic-glow: rgba(168, 85, 247, 0.4); /* Легкий фиолетовый */
+            --legendary-glow: rgba(245, 158, 11, 0.5); /* Легкий оранжевый/янтарный */
         }
 
         body {
@@ -56,9 +63,11 @@
         .mode-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
 
         .slot { aspect-ratio: 2/3.2; border: 1px dashed rgba(243, 208, 120, 0.2); border-radius: 10px; position: relative; }
-        .card { position: absolute; inset: 0; background: var(--card-bg); border: 1px solid var(--gold); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: flyIn 0.4s ease-out forwards; }
+        /* Желтая рамка по умолчанию для всех карт */
+        .card { position: absolute; inset: 0; background: var(--card-bg); border: 1px solid var(--yellow-border); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: flyIn 0.4s ease-out forwards; transition: box-shadow 0.3s ease; }
         @keyframes flyIn { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
         .card-emoji { font-size: 26px; }
+        /* Фиксированный золотой цвет для названия всех карт */
         .card-name { font-size: 8px; color: var(--gold); font-weight: bold; margin-top: 4px; text-transform: uppercase; text-align: center; }
 
         .mode-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
@@ -74,13 +83,15 @@
         .close-x { font-size: 30px; color: white; background: none; border: none; }
 
         .diary-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .diary-row { display: flex; background: #17212b; padding: 12px; border-radius: 15px; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; }
-        .mini-card { min-width: 60px; max-width: 60px; height: 90px; background: #1c2733; border: 1px solid var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .diary-row { display: flex; background: #17212b; padding: 12px; border-radius: 15px; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; transition: box-shadow 0.3s ease; }
+        /* Миникарта тоже с желтой рамкой */
+        .mini-card { min-width: 60px; max-width: 60px; height: 90px; background: #1c2733; border: 1px solid var(--yellow-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
         
         .toggle-btn { background: #313d4d; border: none; color: white; padding: 5px 10px; border-radius: 5px; font-size: 10px; margin-top: 5px; cursor: pointer; }
         .toggle-btn.active { background: #10b981; }
         .locked { filter: grayscale(1) blur(2px); opacity: 0.5; }
 
+        /* ИСПРАВЛЕННАЯ СТРОКА ПРОМОКОДА */
         .promo-input-box { padding: 40px 20px; text-align: center; }
         .promo-input-box input { 
             width: 100%; 
@@ -92,24 +103,18 @@
             font-size: 18px; 
             text-align: center; 
             text-transform: uppercase; 
-            box-sizing: border-box; 
+            box-sizing: border-box; /* Теперь не заходит за экран */
         }
 
-        /* Стиль для кнопки порвать карты */
-        .tear-btn {
-            background: #8b0000;
-            color: white;
-            border: 1px solid #ff4c4c;
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin: 15px auto 30px;
-            display: block;
-            width: 100%;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            box-sizing: border-box;
-        }
+        /* --- СТИЛИ ДЛЯ РЕДКОСТЕЙ --- */
+        /* Обычная (ordinary) без тени, рамка желтая по умолчанию */
+        .ordinary .card, .rarity-ordinary .card { box-shadow: none; }
+
+        /* Редкие с небольшим свечением */
+        .rare .card, .rarity-rare { box-shadow: 0 0 8px var(--rare-glow); }
+        .epic .card, .rarity-epic { box-shadow: 0 0 10px var(--epic-glow); }
+        .legendary .card, .rarity-legendary { box-shadow: 0 0 12px var(--legendary-glow); }
+
     </style>
 </head>
 <body>
@@ -149,49 +154,25 @@
     </div>
 
     <script>
+        // Обновил картыData: добавил rarity и распределил обычные
         const cardsData = [
-            {id: 0, n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.', locked: false, inDeck: true},
-            {id: 1, n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.', locked: false, inDeck: true},
-            {id: 2, n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.', locked: false, inDeck: true},
-            {id: 3, n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.', locked: false, inDeck: true},
-            {id: 4, n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.', locked: false, inDeck: true},
-            {id: 15, n: 'Шут', e: '🃏', d: 'Неудачи и веселья в жизни.', locked: true, inDeck: false, code: 'KLOYN635'},
-            {id: 5, n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.', locked: false, inDeck: true},
-            {id: 6, n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.', locked: false, inDeck: true},
-            {id: 7, n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.', locked: false, inDeck: true},
-            {id: 8, n: 'Удача', e: '🍀', d: 'Счастливый случай и успех в риске.', locked: false, inDeck: true},
-            {id: 9, n: 'Вдохновление', e: '🖼️', d: 'Вдохновение — это то, чего человек не может найти.', locked: false, inDeck: true},
-            {id: 10, n: 'Урожай', e: '🌾', d: 'Что посеешь, то и пожнешь. Отражение твоей заботы.', locked: false, inDeck: true},
-            {id: 11, n: 'Время', e: '⌛', d: 'Час настал. Время превратило старания в результат.', locked: false, inDeck: true},
-            {id: 12, n: 'Дьявол', e: '🔥', d: 'Искушение и материальные привязанности.', locked: true, inDeck: false, code: 'DEVIL'},
-            {id: 13, n: 'six seven', e: '6️⃣7️⃣', d: 'Сикс с дедом. Особая карта.', locked: true, inDeck: false, code: '67'},
-            {id: 14, n: 'Биология', e: '🪦', d: 'Оно🐶🚕 к тебе придёт и поставит 2️⃣🔪', locked: true, inDeck: false, code: 'BIOLOGIA666'},
-            {id: 16, n: 'ROBLOX', e: '🔲', d: 'Ты пытался а оказался Noob', locked: true, inDeck: false, code: 'GIVEMEROBUX1000'}
+            {id: 0, n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.', locked: false, inDeck: true, rarity: 'epic'},
+            {id: 1, n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 2, n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 3, n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.', locked: false, inDeck: true, rarity: 'epic'},
+            {id: 4, n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 15, n: 'Шут', e: '', d: 'Оно🐶🚕 к тебе придёт и поставит 2️⃣🔪', locked: true, inDeck: false, code: 'BIOLOGIA666', rarity: 'legendary'}
+            {id: 5, n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.', locked: false, inDeck: true, rarity: 'rare'},
+            {id: 6, n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.', locked: false, inDeck: true, rarity: 'rare'},
+            {id: 7, n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 8, n: 'Удача', e: '🍀', d: 'Счастливый случай и успех в риске.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 9, n: 'Вдохновление', e: '🖼️', d: 'Вдохновение — это то, чего человек не может найти.', locked: false, inDeck: true, rarity: 'epic'},
+            {id: 10, n: 'Урожай', e: '🌾', d: 'Что посеешь, то и пожнешь. Отражение твоей заботы.', locked: false, inDeck: true, rarity: 'ordinary'},
+            {id: 11, n: 'Время', e: '⌛', d: 'Час настал. Время превратило старания в результат.', locked: false, inDeck: true, rarity: 'rare'},
+            {id: 12, n: 'Дьявол', e: '🔥', d: 'Искушение и материальные привязанности.', locked: true, inDeck: false, code: 'DEVIL', rarity: 'legendary'},
+            {id: 13, n: 'six seven', e: '6️⃣7️⃣', d: 'Сикс с дедом. Особая карта.', locked: true, inDeck: false, code: '67', rarity: 'legendary'},
+            {id: 14, n: 'Биология', e: '⚰', d: 'Оно🐶🚕 к тебе придёт и поставит 2️⃣🔪', locked: true, inDeck: false, code: 'BIOLOGIA666', rarity: 'legendary'}
         ];
-
-        // Загрузка сохранений при запуске
-        function loadState() {
-            const saved = localStorage.getItem('tarotDeckState');
-            if (saved) {
-                const parsedState = JSON.parse(saved);
-                parsedState.forEach(savedCard => {
-                    const card = cardsData.find(c => c.id === savedCard.id);
-                    if (card) {
-                        card.locked = savedCard.locked;
-                        card.inDeck = savedCard.inDeck;
-                    }
-                });
-            }
-        }
-        
-        // Сохранение текущего состояния карт
-        function saveState() {
-            const stateToSave = cardsData.map(c => ({ id: c.id, locked: c.locked, inDeck: c.inDeck }));
-            localStorage.setItem('tarotDeckState', JSON.stringify(stateToSave));
-        }
-
-        // Инициализируем сохранения до начала работы скрипта
-        loadState();
 
         let currentMode = 1;
         let drawnCount = 0;
@@ -233,7 +214,9 @@
             while (used.includes(r.id));
             
             used.push(r.id);
-            document.getElementById(`slot-${drawnCount}`).innerHTML = `<div class="card"><span class="card-emoji">${r.e}</span><span class="card-name">${r.n}</span></div>`;
+            // Применяем класс свечения только если редкость не обычная
+            const rarityClass = r.rarity && r.rarity !== 'ordinary' ? r.rarity : '';
+            document.getElementById(`slot-${drawnCount}`).innerHTML = `<div class="card ${rarityClass}"><span class="card-emoji">${r.e}</span><span class="card-name">${r.n}</span></div>`;
             drawnCount++;
 
             if (drawnCount === currentMode) {
@@ -242,6 +225,7 @@
             }
         }
 
+        // НОВАЯ ФУНКЦИЯ ПЕРЕИГРОВКИ БЕЗ ПЕРЕЗАГРУЗКИ
         function resetGame() {
             drawnCount = 0;
             used = [];
@@ -255,7 +239,6 @@
 
         function openPromo() { document.getElementById('promo-modal').style.display = 'flex'; }
         function closePromo() { document.getElementById('promo-modal').style.display = 'none'; }
-        
         function checkPromo() {
             const val = document.getElementById('promo-field').value.toUpperCase();
             let found = false;
@@ -268,7 +251,6 @@
             });
             if (found) {
                 alert("✅Открыта новая карта! Она уже доступна в колоде");
-                saveState(); // Сохраняем после активации промокода
                 closePromo();
                 document.getElementById('promo-field').value = '';
             } else {
@@ -285,10 +267,9 @@
             const list = document.getElementById('diary-inject');
             const inDeckCount = cardsData.filter(c => !c.locked && c.inDeck).length;
             document.getElementById('deck-status').innerText = `В колоде: ${inDeckCount} (мин. 6)`;
-            
-            // Генерируем карточки
-            let htmlContent = cardsData.map(c => `
-                <div class="diary-row">
+            // Применяем класс свечения к строке дневника в зависимости от редкости
+            list.innerHTML = cardsData.map(c => `
+                <div class="diary-row ${c.locked ? 'locked' : `rarity-${c.rarity || 'ordinary'}`}">
                     <div class="mini-card ${c.locked ? 'locked' : ''}">${c.locked ? '🔒' : c.e}</div>
                     <div class="diary-text">
                         <div style="color:var(--gold); font-weight:bold; font-size:14px;">${c.locked ? '???' : c.n}</div>
@@ -297,38 +278,12 @@
                     </div>
                 </div>
             `).join('');
-
-            // Добавляем кнопку "Порвать карты" в самый низ списка
-            htmlContent += `
-                <button class="tear-btn" onclick="tearCards()">🔪 ПОРВАТЬ ПРОМО-КАРТЫ</button>
-            `;
-
-            list.innerHTML = htmlContent;
         }
 
         function toggleCard(id) {
             const card = cardsData.find(c => c.id === id);
             card.inDeck = !card.inDeck;
-            saveState(); // Сохраняем, когда убираем/добавляем в колоду из дневника
             renderDiary();
-        }
-
-        // Функция удаления карт (кнопка в дневнике)
-        function tearCards() {
-            const confirmDelete = confirm("Вы уверены, что хотите порвать (удалить) все карты, полученные по промокодам?");
-            if (confirmDelete) {
-                cardsData.forEach(c => {
-                    // Если у карты есть свойство 'code', значит это промо-карта
-                    if (c.code) {
-                        c.locked = true;
-                        c.inDeck = false;
-                    }
-                });
-                saveState(); // Обновляем сохранение
-                renderDiary(); // Перерисовываем дневник
-                resetGame(); // Сбрасываем стол, чтобы промо-карты пропали с экрана, если они там были
-                alert("🔪 Промо-карты порваны и удалены из колоды!");
-            }
         }
     </script>
 </body>
