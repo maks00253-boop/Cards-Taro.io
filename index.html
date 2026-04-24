@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Taro Cards</title>
+    <title>Tarot Fix Deck</title>
     <style>
         :root {
             --bg: #0e1621;
@@ -23,7 +23,6 @@
             overflow: hidden;
         }
 
-        /* Верхняя панель */
         .top-bar {
             padding: 40px 15px 10px;
             display: flex;
@@ -50,7 +49,6 @@
             font-size: 12px;
         }
 
-        /* Игровое поле */
         .slots-outer { flex: 2; display: flex; align-items: center; justify-content: center; padding: 10px; }
         .slots-container { display: grid; gap: 8px; width: 100%; max-width: 400px; }
         .mode-1 { grid-template-columns: 1fr; width: 110px; }
@@ -71,25 +69,32 @@
         .btn { width: 100%; height: 54px; background: var(--tg-blue); border: none; border-radius: 14px; color: white; font-weight: 600; }
         .btn.reset-state { background: #313d4d !important; color: #a0a0a0; }
 
-        /* Модалки */
         .modal { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; flex-direction: column; }
         .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .close-x { font-size: 30px; color: white; background: none; border: none; }
 
-        /* Стили дневника */
         .diary-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .diary-row { display: flex; background: #17212b; padding: 12px; border-radius: 15px; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; }
         .mini-card { min-width: 60px; max-width: 60px; height: 90px; background: #1c2733; border: 1px solid var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
-        .diary-text { flex-grow: 1; min-width: 0; }
         
-        /* Переключатель Вкл/Выкл */
         .toggle-btn { background: #313d4d; border: none; color: white; padding: 5px 10px; border-radius: 5px; font-size: 10px; margin-top: 5px; cursor: pointer; }
         .toggle-btn.active { background: #10b981; }
         .locked { filter: grayscale(1) blur(2px); opacity: 0.5; }
 
-        /* Окно промокода */
+        /* ИСПРАВЛЕННАЯ СТРОКА ПРОМОКОДА */
         .promo-input-box { padding: 40px 20px; text-align: center; }
-        .promo-input-box input { width: 100%; padding: 15px; background: #1c2733; border: 1px solid var(--tg-blue); border-radius: 10px; color: white; font-size: 18px; text-align: center; text-transform: uppercase; }
+        .promo-input-box input { 
+            width: 100%; 
+            padding: 15px; 
+            background: #1c2733; 
+            border: 1px solid var(--tg-blue); 
+            border-radius: 10px; 
+            color: white; 
+            font-size: 18px; 
+            text-align: center; 
+            text-transform: uppercase; 
+            box-sizing: border-box; /* Теперь не заходит за экран */
+        }
     </style>
 </head>
 <body>
@@ -114,44 +119,37 @@
         <button class="btn" id="mainBtn" onclick="drawCard()">ВЫТЯНУТЬ КАРТУ</button>
     </div>
 
-    <!-- МОДАЛКА ПРОМОКОДА -->
     <div id="promo-modal" class="modal">
-        <div class="modal-header"><h3>Ввести промокод</h3><button class="close-x" onclick="closePromo()">×</button></div>
+        <div class="modal-header"><h3>Промокод</h3><button class="close-x" onclick="closePromo()">×</button></div>
         <div class="promo-input-box">
-            <input type="text" id="promo-field" placeholder="Введите код...">
+            <input type="text" id="promo-field" placeholder="ВВЕДИТЕ КОД">
             <button class="btn" style="margin-top: 20px;" onclick="checkPromo()">АКТИВИРОВАТЬ</button>
         </div>
     </div>
 
-    <!-- МОДАЛКА ДНЕВНИКА -->
     <div id="diary-modal" class="modal">
-        <div class="modal-header"><h3>📕 Дневник и Колода</h3><button class="close-x" onclick="toggleDiary(false)">×</button></div>
+        <div class="modal-header"><h3>📕 Дневник</h3><button class="close-x" onclick="toggleDiary(false)">×</button></div>
         <div id="deck-status" style="text-align: center; font-size: 11px; color: var(--gold); padding: 5px;"></div>
         <div class="diary-list" id="diary-inject"></div>
     </div>
 
     <script>
-        // База карт
-        // Обновленная база карт
-const cardsData = [
-    {id: 0, n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.', locked: false, inDeck: true},
-    {id: 1, n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.', locked: false, inDeck: true},
-    {id: 2, n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.', locked: false, inDeck: true},
-    {id: 3, n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.', locked: false, inDeck: true},
-    {id: 4, n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.', locked: false, inDeck: true},
-    {id: 5, n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.', locked: false, inDeck: true},
-    {id: 6, n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.', locked: false, inDeck: true},
-    {id: 7, n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.', locked: false, inDeck: true},
-    {id: 8, n: 'Удача', e: '🍀', d: 'Счастливый случай и успех в риске.', locked: false, inDeck: true},
-    {id: 9, n: 'Вдохновление', e: '🖼️', d: 'Вдохновение — это то, чего человек не может найти.', locked: false, inDeck: true},
-    {id: 10, n: 'Урожай', e: '🌾', d: 'Что посеешь, то и пожнешь. Отражение твоей заботы и ожидания.', locked: false, inDeck: true},
-    {id: 11, n: 'Время', e: '⌛', d: 'Час настал. Время превратило старания в реальный результат.', locked: false, inDeck: true},
-    
-    // Секретные карты (разблокируются промокодами)
-    {id: 12, n: 'Дьявол', e: '🔥', d: 'Искушение и материальные привязанности.', locked: true, inDeck: false, code: 'DEVIL'},
-    {id: 13, n: 'six seven', e: '6️⃣7️⃣', d: 'Сикс с дедом. Особая карта для тех, кто знает.', locked: true, inDeck: false, code: '67'}
-];
-
+        const cardsData = [
+            {id: 0, n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.', locked: false, inDeck: true},
+            {id: 1, n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.', locked: false, inDeck: true},
+            {id: 2, n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.', locked: false, inDeck: true},
+            {id: 3, n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.', locked: false, inDeck: true},
+            {id: 4, n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.', locked: false, inDeck: true},
+            {id: 5, n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.', locked: false, inDeck: true},
+            {id: 6, n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.', locked: false, inDeck: true},
+            {id: 7, n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.', locked: false, inDeck: true},
+            {id: 8, n: 'Удача', e: '🍀', d: 'Счастливый случай и успех в риске.', locked: false, inDeck: true},
+            {id: 9, n: 'Вдохновление', e: '🖼️', d: 'Вдохновение — это то, чего человек не может найти.', locked: false, inDeck: true},
+            {id: 10, n: 'Урожай', e: '🌾', d: 'Что посеешь, то и пожнешь. Отражение твоей заботы.', locked: false, inDeck: true},
+            {id: 11, n: 'Время', e: '⌛', d: 'Час настал. Время превратило старания в результат.', locked: false, inDeck: true},
+            {id: 12, n: 'Дьявол', e: '🔥', d: 'Искушение и материальные привязанности.', locked: true, inDeck: false, code: 'DEVIL'},
+            {id: 13, n: 'six seven', e: '6️⃣7️⃣', d: 'Сикс с дедом. Особая карта.', locked: true, inDeck: false, code: '67'}
+        ];
 
         let currentMode = 1;
         let drawnCount = 0;
@@ -164,36 +162,36 @@ const cardsData = [
             box.className = `slots-container mode-${n}`;
             box.innerHTML = '';
             for(let i=0; i<n; i++) box.innerHTML += `<div class="slot" id="slot-${i}"></div>`;
-            document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', [1,3,6][i] == n));
+            document.querySelectorAll('.mode-btn').forEach((b, i) => {
+                const modeVal = [1,3,6][i];
+                b.classList.toggle('active', modeVal == n);
+            });
         }
         setMode(1);
 
         function drawCard() {
             const activeDeck = cardsData.filter(c => !c.locked && c.inDeck);
-            
-            if (activeDeck.length < 6) {
-                alert(`В колоде только ${activeDeck.length} карт! Нужно минимум 6. Зайди в Дневник.`);
+            const btn = document.getElementById('mainBtn');
+
+            if (drawnCount >= currentMode) {
+                resetGame();
                 return;
             }
 
-            const btn = document.getElementById('mainBtn');
-            if (drawnCount >= currentMode) { location.reload(); return; }
+            if (activeDeck.length < 6) {
+                alert(`В колоде ${activeDeck.length} карт! Нужно минимум 6.`);
+                return;
+            }
 
             document.getElementById('selector').style.opacity = '0.3';
             document.getElementById('selector').style.pointerEvents = 'none';
 
             let r;
-            do { 
-                r = activeDeck[Math.floor(Math.random() * activeDeck.length)]; 
-            } while (used.includes(r.id));
+            do { r = activeDeck[Math.floor(Math.random() * activeDeck.length)]; } 
+            while (used.includes(r.id));
             
             used.push(r.id);
-            document.getElementById(`slot-${drawnCount}`).innerHTML = `
-                <div class="card">
-                    <span class="card-emoji">${r.e}</span>
-                    <span class="card-name">${r.n}</span>
-                </div>
-            `;
+            document.getElementById(`slot-${drawnCount}`).innerHTML = `<div class="card"><span class="card-emoji">${r.e}</span><span class="card-name">${r.n}</span></div>`;
             drawnCount++;
 
             if (drawnCount === currentMode) {
@@ -202,7 +200,18 @@ const cardsData = [
             }
         }
 
-        // Логика промокодов
+        // НОВАЯ ФУНКЦИЯ ПЕРЕИГРОВКИ БЕЗ ПЕРЕЗАГРУЗКИ
+        function resetGame() {
+            drawnCount = 0;
+            used = [];
+            const btn = document.getElementById('mainBtn');
+            btn.innerText = 'ВЫТЯНУТЬ КАРТУ';
+            btn.classList.remove('reset-state');
+            document.getElementById('selector').style.opacity = '1';
+            document.getElementById('selector').style.pointerEvents = 'auto';
+            setMode(currentMode);
+        }
+
         function openPromo() { document.getElementById('promo-modal').style.display = 'flex'; }
         function closePromo() { document.getElementById('promo-modal').style.display = 'none'; }
         function checkPromo() {
@@ -216,15 +225,14 @@ const cardsData = [
                 }
             });
             if (found) {
-                alert("Успешно! Новая карта открыта и добавлена в колоду.");
+                alert("Карта открыта!");
                 closePromo();
-                renderDiary();
+                document.getElementById('promo-field').value = '';
             } else {
                 alert("Неверный код!");
             }
         }
 
-        // Логика дневника
         function toggleDiary(s) {
             document.getElementById('diary-modal').style.display = s ? 'flex' : 'none';
             if(s) renderDiary();
@@ -233,15 +241,14 @@ const cardsData = [
         function renderDiary() {
             const list = document.getElementById('diary-inject');
             const inDeckCount = cardsData.filter(c => !c.locked && c.inDeck).length;
-            document.getElementById('deck-status').innerText = `Карт в колоде: ${inDeckCount} (мин. 6)`;
-
+            document.getElementById('deck-status').innerText = `В колоде: ${inDeckCount} (мин. 6)`;
             list.innerHTML = cardsData.map(c => `
                 <div class="diary-row">
                     <div class="mini-card ${c.locked ? 'locked' : ''}">${c.locked ? '🔒' : c.e}</div>
                     <div class="diary-text">
-                        <div style="color:var(--gold); font-weight:bold;">${c.locked ? '???' : c.n}</div>
-                        <div style="color:#708499; font-size:11px;">${c.locked ? 'Эту карту нужно разблокировать' : c.d}</div>
-                        ${!c.locked ? `<button class="toggle-btn ${c.inDeck ? 'active' : ''}" onclick="toggleCard(${c.id})">${c.inDeck ? 'В КОЛОДЕ' : 'НЕ В КОЛОДЕ'}</button>` : ''}
+                        <div style="color:var(--gold); font-weight:bold; font-size:14px;">${c.locked ? '???' : c.n}</div>
+                        <div style="color:#708499; font-size:11px;">${c.locked ? 'Введите код' : c.d}</div>
+                        ${!c.locked ? `<button class="toggle-btn ${c.inDeck ? 'active' : ''}" onclick="toggleCard(${c.id})">${c.inDeck ? 'В КОЛОДЕ' : 'УБРАТЬ'}</button>` : ''}
                     </div>
                 </div>
             `).join('');
@@ -254,4 +261,5 @@ const cardsData = [
         }
     </script>
 </body>
-</html>
+            </html>
+            
