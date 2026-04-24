@@ -8,15 +8,14 @@
         :root {
             --bg: #0e1621;
             --tg-blue: #2481cc;
-            /* Изменил на более желтый цвет для рамки */
-            --yellow-border: #ffff00;
             --gold: #f3d078;
             --card-bg: #1c2733;
-
-            /* Разные цвета для небольшого свечения */
-            --rare-glow: rgba(16, 185, 129, 0.3); /* Легкий зеленый */
-            --epic-glow: rgba(168, 85, 247, 0.4); /* Легкий фиолетовый */
-            --legendary-glow: rgba(245, 158, 11, 0.5); /* Легкий оранжевый/янтарный */
+            --yellow-border: #ffff00; /* Яркая желтая рамка */
+            
+            /* Цвета свечения ЗА картой */
+            --glow-rare: rgba(16, 185, 129, 0.8);
+            --glow-epic: rgba(168, 85, 247, 0.8);
+            --glow-legendary: rgba(255, 215, 0, 0.8);
         }
 
         body {
@@ -30,31 +29,9 @@
             overflow: hidden;
         }
 
-        .top-bar {
-            padding: 40px 15px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .promo-btn {
-            background: #2b3a4a;
-            border: 1px solid var(--tg-blue);
-            color: var(--tg-blue);
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .diary-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
+        .top-bar { padding: 40px 15px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .promo-btn { background: #2b3a4a; border: 1px solid var(--tg-blue); color: var(--tg-blue); padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+        .diary-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--gold); color: var(--gold); padding: 8px 12px; border-radius: 10px; font-size: 12px; }
 
         .slots-outer { flex: 2; display: flex; align-items: center; justify-content: center; padding: 10px; }
         .slots-container { display: grid; gap: 8px; width: 100%; max-width: 400px; }
@@ -63,11 +40,25 @@
         .mode-6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); }
 
         .slot { aspect-ratio: 2/3.2; border: 1px dashed rgba(243, 208, 120, 0.2); border-radius: 10px; position: relative; }
-        /* Желтая рамка по умолчанию для всех карт */
-        .card { position: absolute; inset: 0; background: var(--card-bg); border: 1px solid var(--yellow-border); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: flyIn 0.4s ease-out forwards; transition: box-shadow 0.3s ease; }
+        
+        /* КАРТОЧКА С ЖЕЛТОЙ РАМКОЙ */
+        .card { 
+            position: absolute; inset: 0; 
+            background: var(--card-bg); 
+            border: 2px solid var(--yellow-border); 
+            border-radius: 10px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            animation: flyIn 0.4s ease-out forwards; 
+        }
+        
+        /* СВЕЧЕНИЕ ЗА КАРТОЧКОЙ */
+        .rare { box-shadow: 0 0 15px var(--glow-rare); }
+        .epic { box-shadow: 0 0 15px var(--glow-epic); }
+        .legendary { box-shadow: 0 0 20px var(--glow-legendary); }
+        .ordinary { box-shadow: none; }
+
         @keyframes flyIn { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
         .card-emoji { font-size: 26px; }
-        /* Фиксированный золотой цвет для названия всех карт */
         .card-name { font-size: 8px; color: var(--gold); font-weight: bold; margin-top: 4px; text-transform: uppercase; text-align: center; }
 
         .mode-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
@@ -83,38 +74,29 @@
         .close-x { font-size: 30px; color: white; background: none; border: none; }
 
         .diary-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .diary-row { display: flex; background: #17212b; padding: 12px; border-radius: 15px; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; transition: box-shadow 0.3s ease; }
-        /* Миникарта тоже с желтой рамкой */
-        .mini-card { min-width: 60px; max-width: 60px; height: 90px; background: #1c2733; border: 1px solid var(--yellow-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .diary-row { display: flex; background: #17212b; padding: 12px; border-radius: 15px; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; }
+        
+        /* МИНИ-КАРТА В ДНЕВНИКЕ */
+        .mini-card { 
+            min-width: 60px; max-width: 60px; height: 90px; 
+            background: #1c2733; 
+            border: 2px solid var(--yellow-border); 
+            border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; 
+        }
         
         .toggle-btn { background: #313d4d; border: none; color: white; padding: 5px 10px; border-radius: 5px; font-size: 10px; margin-top: 5px; cursor: pointer; }
         .toggle-btn.active { background: #10b981; }
-        .locked { filter: grayscale(1) blur(2px); opacity: 0.5; }
+        .locked { filter: grayscale(1) blur(2px); opacity: 0.5; box-shadow: none !important; }
 
-        /* ИСПРАВЛЕННАЯ СТРОКА ПРОМОКОДА */
         .promo-input-box { padding: 40px 20px; text-align: center; }
         .promo-input-box input { 
-            width: 100%; 
-            padding: 15px; 
-            background: #1c2733; 
-            border: 1px solid var(--tg-blue); 
-            border-radius: 10px; 
-            color: white; 
-            font-size: 18px; 
-            text-align: center; 
-            text-transform: uppercase; 
-            box-sizing: border-box; /* Теперь не заходит за экран */
+            width: 100%; padding: 15px; background: #1c2733; border: 1px solid var(--tg-blue); border-radius: 10px; color: white; font-size: 18px; text-align: center; text-transform: uppercase; box-sizing: border-box; 
         }
 
-        /* --- СТИЛИ ДЛЯ РЕДКОСТЕЙ --- */
-        /* Обычная (ordinary) без тени, рамка желтая по умолчанию */
-        .ordinary .card, .rarity-ordinary .card { box-shadow: none; }
-
-        /* Редкие с небольшим свечением */
-        .rare .card, .rarity-rare { box-shadow: 0 0 8px var(--rare-glow); }
-        .epic .card, .rarity-epic { box-shadow: 0 0 10px var(--epic-glow); }
-        .legendary .card, .rarity-legendary { box-shadow: 0 0 12px var(--legendary-glow); }
-
+        .tear-btn {
+            background: #8b0000; color: white; border: 1px solid #ff4c4c; padding: 12px; border-radius: 10px; margin: 10px 0 20px; width: 100%; font-weight: bold; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -154,14 +136,13 @@
     </div>
 
     <script>
-        // Обновил картыData: добавил rarity и распределил обычные
         const cardsData = [
             {id: 0, n: 'Смерть', e: '💀', d: 'Трансформация и глубокие перемены.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 1, n: 'Золото', e: '💰', d: 'Материальное благополучие и прибыль.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 2, n: 'Любовь', e: '❤️', d: 'Гармония, чувства и сильная привязанность.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 3, n: 'Красота', e: '💎', d: 'Эстетика и уверенность в своем превосходстве.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 4, n: 'Чума', e: '🎭', d: 'Скрытые угрозы и неискренность вокруг.', locked: false, inDeck: true, rarity: 'ordinary'},
-            {id: 15, n: 'Шут', e: '🃏', d: 'Успех и разочорование в дальнейшем.', locked: true, inDeck: false, code: 'KLOYN635', rarity: 'rare'},
+            {id: 14, n: 'Шут', e: '🃏', d: 'Ваш дальнейший путь будет смешным и ужасным.', locked: true, inDeck: false, code: 'KLOYN', rarity: 'epic'},
             {id: 5, n: 'Солнце', e: '☀️', d: 'Абсолютный успех, ясность и радость.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 6, n: 'Луна', e: '🌙', d: 'Иллюзии, мечты и тайные знания.', locked: false, inDeck: true, rarity: 'ordinary'},
             {id: 7, n: 'Сила', e: '🦁', d: 'Внутренняя мощь и контроль над ситуацией.', locked: false, inDeck: true, rarity: 'ordinary'},
@@ -174,6 +155,21 @@
             {id: 14, n: 'Биология', e: '🪦', d: 'Оно🐶🚕 к тебе придёт и поставит 2️⃣🔪', locked: true, inDeck: false, code: 'BIOLOGIA666', rarity: 'legendary'}
         ];
 
+        function loadState() {
+            const saved = localStorage.getItem('tarotDeckState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                parsed.forEach(s => {
+                    const card = cardsData.find(c => c.id === s.id);
+                    if (card) { card.locked = s.locked; card.inDeck = s.inDeck; }
+                });
+            }
+        }
+        function saveState() {
+            localStorage.setItem('tarotDeckState', JSON.stringify(cardsData.map(c => ({id:c.id, locked:c.locked, inDeck:c.inDeck}))));
+        }
+
+        loadState();
         let currentMode = 1;
         let drawnCount = 0;
         let used = [];
@@ -185,50 +181,34 @@
             box.className = `slots-container mode-${n}`;
             box.innerHTML = '';
             for(let i=0; i<n; i++) box.innerHTML += `<div class="slot" id="slot-${i}"></div>`;
-            document.querySelectorAll('.mode-btn').forEach((b, i) => {
-                const modeVal = [1,3,6][i];
-                b.classList.toggle('active', modeVal == n);
-            });
+            document.querySelectorAll('.mode-btn').forEach((b, i) => b.classList.toggle('active', [1,3,6][i] == n));
         }
         setMode(1);
 
         function drawCard() {
             const activeDeck = cardsData.filter(c => !c.locked && c.inDeck);
-            const btn = document.getElementById('mainBtn');
-
-            if (drawnCount >= currentMode) {
-                resetGame();
-                return;
-            }
-
-            if (activeDeck.length < 6) {
-                alert(`В колоде ${activeDeck.length} карт! Нужно минимум 6.`);
-                return;
-            }
+            if (drawnCount >= currentMode) { resetGame(); return; }
+            if (activeDeck.length < 6) { alert(`В колоде ${activeDeck.length} карт! Нужно минимум 6.`); return; }
 
             document.getElementById('selector').style.opacity = '0.3';
             document.getElementById('selector').style.pointerEvents = 'none';
 
             let r;
-            do { r = activeDeck[Math.floor(Math.random() * activeDeck.length)]; } 
-            while (used.includes(r.id));
-            
+            do { r = activeDeck[Math.floor(Math.random() * activeDeck.length)]; } while (used.includes(r.id));
             used.push(r.id);
-            // Применяем класс свечения только если редкость не обычная
-            const rarityClass = r.rarity && r.rarity !== 'ordinary' ? r.rarity : '';
-            document.getElementById(`slot-${drawnCount}`).innerHTML = `<div class="card ${rarityClass}"><span class="card-emoji">${r.e}</span><span class="card-name">${r.n}</span></div>`;
+            
+            document.getElementById(`slot-${drawnCount}`).innerHTML = `<div class="card ${r.rarity}"><span class="card-emoji">${r.e}</span><span class="card-name">${r.n}</span></div>`;
             drawnCount++;
 
             if (drawnCount === currentMode) {
+                const btn = document.getElementById('mainBtn');
                 btn.innerText = 'ПЕРЕИГРАТЬ';
                 btn.classList.add('reset-state');
             }
         }
 
-        // НОВАЯ ФУНКЦИЯ ПЕРЕИГРОВКИ БЕЗ ПЕРЕЗАГРУЗКИ
         function resetGame() {
-            drawnCount = 0;
-            used = [];
+            drawnCount = 0; used = [];
             const btn = document.getElementById('mainBtn');
             btn.innerText = 'ВЫТЯНУТЬ КАРТУ';
             btn.classList.remove('reset-state');
@@ -242,48 +222,41 @@
         function checkPromo() {
             const val = document.getElementById('promo-field').value.toUpperCase();
             let found = false;
-            cardsData.forEach(c => {
-                if (c.locked && c.code === val) {
-                    c.locked = false;
-                    c.inDeck = true;
-                    found = true;
-                }
-            });
-            if (found) {
-                alert("✅Открыта новая карта! Она уже доступна в колоде");
-                closePromo();
-                document.getElementById('promo-field').value = '';
-            } else {
-                alert("❌Неверный код! Такого не нашли по картам!");
-            }
+            cardsData.forEach(c => { if (c.locked && c.code === val) { c.locked = false; c.inDeck = true; found = true; } });
+            if (found) { saveState(); alert("✅ Новая карта открыта!"); closePromo(); document.getElementById('promo-field').value = ''; } 
+            else { alert("❌ Неверный код!"); }
         }
 
-        function toggleDiary(s) {
-            document.getElementById('diary-modal').style.display = s ? 'flex' : 'none';
-            if(s) renderDiary();
-        }
+        function toggleDiary(s) { document.getElementById('diary-modal').style.display = s ? 'flex' : 'none'; if(s) renderDiary(); }
 
         function renderDiary() {
             const list = document.getElementById('diary-inject');
             const inDeckCount = cardsData.filter(c => !c.locked && c.inDeck).length;
             document.getElementById('deck-status').innerText = `В колоде: ${inDeckCount} (мин. 6)`;
-            // Применяем класс свечения к строке дневника в зависимости от редкости
+            
             list.innerHTML = cardsData.map(c => `
-                <div class="diary-row ${c.locked ? 'locked' : `rarity-${c.rarity || 'ordinary'}`}">
-                    <div class="mini-card ${c.locked ? 'locked' : ''}">${c.locked ? '🔒' : c.e}</div>
+                <div class="diary-row">
+                    <div class="mini-card ${c.locked ? 'locked' : c.rarity}">${c.locked ? '🔒' : c.e}</div>
                     <div class="diary-text">
                         <div style="color:var(--gold); font-weight:bold; font-size:14px;">${c.locked ? '???' : c.n}</div>
-                        <div style="color:#708499; font-size:11px;">${c.locked ? 'У вас нету этой карты!' : c.d}</div>
+                        <div style="color:#708499; font-size:11px;">${c.locked ? 'У вас нет этой карты!' : c.d}</div>
                         ${!c.locked ? `<button class="toggle-btn ${c.inDeck ? 'active' : ''}" onclick="toggleCard(${c.id})">${c.inDeck ? 'В КОЛОДЕ' : 'НЕ В КОЛОДЕ'}</button>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `).join('') + `<button class="tear-btn" onclick="tearCards()">🔪 ПОРВАТЬ ПРОМО-КАРТЫ</button>`;
         }
 
         function toggleCard(id) {
             const card = cardsData.find(c => c.id === id);
             card.inDeck = !card.inDeck;
-            renderDiary();
+            saveState(); renderDiary();
+        }
+
+        function tearCards() {
+            if (confirm("Точно порвать все промо-карты?")) {
+                cardsData.forEach(c => { if (c.code) { c.locked = true; c.inDeck = false; } });
+                saveState(); renderDiary(); resetGame();
+            }
         }
     </script>
 </body>
