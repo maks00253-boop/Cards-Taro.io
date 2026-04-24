@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tarot Fix Deck</title>
+    <title>Taro Cards</title>
     <style>
         :root {
             --bg: #0e1621;
@@ -81,7 +81,6 @@
         .toggle-btn.active { background: #10b981; }
         .locked { filter: grayscale(1) blur(2px); opacity: 0.5; }
 
-        /* ИСПРАВЛЕННАЯ СТРОКА ПРОМОКОДА */
         .promo-input-box { padding: 40px 20px; text-align: center; }
         .promo-input-box input { 
             width: 100%; 
@@ -93,7 +92,21 @@
             font-size: 18px; 
             text-align: center; 
             text-transform: uppercase; 
-            box-sizing: border-box; /* Теперь не заходит за экран */
+            box-sizing: border-box; 
+        }
+
+        /* Стиль для кнопки порвать карты */
+        .tear-btn {
+            background: #8b0000;
+            color: white;
+            border: 1px solid #ff4c4c;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin: 5px auto 10px;
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -128,7 +141,8 @@
     </div>
 
     <div id="diary-modal" class="modal">
-        <div class="modal-header"><h3>📕 Дневник</h3><button class="close-x" onclick="toggleDiary(false)">×</button></div>
+        <div class="modal-header"><h3>📕 Дневник</h3><button class="close-x" onclick="toggleDiary(false)">×</button
+><button class="tear-btn" onclick="tearCards()">ПОРВАТЬ КАРТЫ</button></div>
         <div id="deck-status" style="text-align: center; font-size: 11px; color: var(--gold); padding: 5px;"></div>
         <div class="diary-list" id="diary-inject"></div>
     </div>
@@ -151,6 +165,30 @@
             {id: 13, n: 'six seven', e: '6️⃣7️⃣', d: 'Сикс с дедом. Особая карта.', locked: true, inDeck: false, code: '67'},
             {id: 14, n: 'Биология', e: '🪦', d: 'Оно🐶🚕 к тебе придёт и поставит 2️⃣🔪', locked: true, inDeck: false, code: 'BIOLOGIA666'}
         ];
+
+        // Загрузка сохранений при запуске
+        function loadState() {
+            const saved = localStorage.getItem('tarotDeckState');
+            if (saved) {
+                const parsedState = JSON.parse(saved);
+                parsedState.forEach(savedCard => {
+                    const card = cardsData.find(c => c.id === savedCard.id);
+                    if (card) {
+                        card.locked = savedCard.locked;
+                        card.inDeck = savedCard.inDeck;
+                    }
+                });
+            }
+        }
+        
+        // Сохранение текущего состояния карт
+        function saveState() {
+            const stateToSave = cardsData.map(c => ({ id: c.id, locked: c.locked, inDeck: c.inDeck }));
+            localStorage.setItem('tarotDeckState', JSON.stringify(stateToSave));
+        }
+
+        // Инициализируем сохранения до начала работы скрипта
+        loadState();
 
         let currentMode = 1;
         let drawnCount = 0;
@@ -201,7 +239,6 @@
             }
         }
 
-        // НОВАЯ ФУНКЦИЯ ПЕРЕИГРОВКИ БЕЗ ПЕРЕЗАГРУЗКИ
         function resetGame() {
             drawnCount = 0;
             used = [];
@@ -215,6 +252,7 @@
 
         function openPromo() { document.getElementById('promo-modal').style.display = 'flex'; }
         function closePromo() { document.getElementById('promo-modal').style.display = 'none'; }
+        
         function checkPromo() {
             const val = document.getElementById('promo-field').value.toUpperCase();
             let found = false;
@@ -227,6 +265,7 @@
             });
             if (found) {
                 alert("✅Открыта новая карта! Она уже доступна в колоде");
+                saveState(); // Сохраняем после активации промокода
                 closePromo();
                 document.getElementById('promo-field').value = '';
             } else {
@@ -258,9 +297,27 @@
         function toggleCard(id) {
             const card = cardsData.find(c => c.id === id);
             card.inDeck = !card.inDeck;
+            saveState(); // Сохраняем, когда убираем/добавляем в колоду из дневника
             renderDiary();
+        }
+
+        // Функция удаления карт (кнопка в дневнике)
+        function tearCards() {
+            const confirmDelete = confirm("Вы уверены, что хотите порвать (удалить) все карты, полученные по промокодам?");
+            if (confirmDelete) {
+                cardsData.forEach(c => {
+                    // Если у карты есть свойство 'code', значит это промо-карта
+                    if (c.code) {
+                        c.locked = true;
+                        c.inDeck = false;
+                    }
+                });
+                saveState(); // Обновляем сохранение
+                renderDiary(); // Перерисовываем дневник
+                resetGame(); // Сбрасываем стол, чтобы промо-карты пропали с экрана, если они там были
+                alert("🔪 Промо-карты порваны и удалены из колоды!");
+            }
         }
     </script>
 </body>
-            </html>
-            
+</html>
