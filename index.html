@@ -247,8 +247,8 @@
                     <div class="mini-card ${c.locked ? 'locked' : ''}">${c.locked ? '🔒' : c.e}</div>
                     <div class="diary-text">
                         <div style="color:var(--gold); font-weight:bold; font-size:14px;">${c.locked ? '???' : c.n}</div>
-                        <div style="color:#708499; font-size:11px;">${c.locked ? 'Введите код' : c.d}</div>
-                        ${!c.locked ? `<button class="toggle-btn ${c.inDeck ? 'active' : ''}" onclick="toggleCard(${c.id})">${c.inDeck ? 'В КОЛОДЕ' : 'УБРАТЬ'}</button>` : ''}
+                        <div style="color:#708499; font-size:11px;">${c.locked ? 'У вас нету этой карты!' : c.d}</div>
+                        ${!c.locked ? `<button class="toggle-btn ${c.inDeck ? 'active' : ''}" onclick="toggleCard(${c.id})">${c.inDeck ? 'В КОЛОДЕ' : 'НЕ В КОЛОДЕ'}</button>` : ''}
                     </div>
                 </div>
             `).join('');
