@@ -62,12 +62,12 @@
         .card-name { font-size: 8px; color: var(--gold); font-weight: bold; margin-top: 4px; text-transform: uppercase; text-align: center; }
 
         .mode-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .mode-btn { background: #1c2733; border: 1px solid rgba(255,255,255,0.1); color: white; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; }
+        .mode-btn { background: #1c2733; border: 1px solid rgba(255,255,255,0.1); color: white; width: 40px; height: 40px; border-radius: 25%; font-weight: bold; }
         .mode-btn.active { background: var(--tg-blue); box-shadow: 0 0 10px var(--tg-blue); }
 
         .footer { padding: 20px 20px calc(30px + env(safe-area-inset-bottom)); background: #17212b; }
         .btn { width: 100%; height: 54px; background: var(--tg-blue); border: none; border-radius: 14px; color: white; font-weight: 600; }
-        .btn.reset-state { background: #313d4d !important; color: #a0a0a0; }
+        .btn.reset-state { background: #313d4d !important; color: #ffffff; }
 
         .modal { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 1000; flex-direction: column; }
         .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -225,11 +225,11 @@
                 }
             });
             if (found) {
-                alert("Карта открыта!");
+                alert("✅Открыта новая карта! Она уже доступна в колоде");
                 closePromo();
                 document.getElementById('promo-field').value = '';
             } else {
-                alert("Неверный код!");
+                alert("❌Неверный код! Такого не нашли по картам!");
             }
         }
 
