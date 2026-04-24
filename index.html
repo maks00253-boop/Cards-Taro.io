@@ -100,13 +100,15 @@
             background: #8b0000;
             color: white;
             border: 1px solid #ff4c4c;
-            padding: 8px 15px;
-            border-radius: 8px;
-            margin: 5px auto 10px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin: 15px auto 30px;
             display: block;
-            font-size: 12px;
+            width: 100%;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -141,7 +143,7 @@
     </div>
 
     <div id="diary-modal" class="modal">
-        <div class="modal-header"><h3>📕 Дневник</h3><button class="tear-btn" onclick="tearCards()">Порвать карты</button></div><button class="close-x" onclick="toggleDiary(false)">×</button>
+        <div class="modal-header"><h3>📕 Дневник</h3><button class="close-x" onclick="toggleDiary(false)">×</button></div>
         <div id="deck-status" style="text-align: center; font-size: 11px; color: var(--gold); padding: 5px;"></div>
         <div class="diary-list" id="diary-inject"></div>
     </div>
@@ -281,7 +283,9 @@
             const list = document.getElementById('diary-inject');
             const inDeckCount = cardsData.filter(c => !c.locked && c.inDeck).length;
             document.getElementById('deck-status').innerText = `В колоде: ${inDeckCount} (мин. 6)`;
-            list.innerHTML = cardsData.map(c => `
+            
+            // Генерируем карточки
+            let htmlContent = cardsData.map(c => `
                 <div class="diary-row">
                     <div class="mini-card ${c.locked ? 'locked' : ''}">${c.locked ? '🔒' : c.e}</div>
                     <div class="diary-text">
@@ -291,6 +295,13 @@
                     </div>
                 </div>
             `).join('');
+
+            // Добавляем кнопку "Порвать карты" в самый низ списка
+            htmlContent += `
+                <button class="tear-btn" onclick="tearCards()">🔪 ПОРВАТЬ ПРОМО-КАРТЫ</button>
+            `;
+
+            list.innerHTML = htmlContent;
         }
 
         function toggleCard(id) {
